@@ -4,10 +4,12 @@ import com.trufanov.dto.request.CreateAccountRequestDto;
 import com.trufanov.entity.Account;
 import com.trufanov.entity.Customer;
 import com.trufanov.entity.Transaction;
+import com.trufanov.exception.EntityNotFoundException;
 import com.trufanov.repository.AccountRepository;
 import com.trufanov.repository.CustomerRepository;
 import com.trufanov.repository.TransactionRepository;
 import com.trufanov.service.AccountService;
+import com.trufanov.service.CustomerService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -20,7 +22,7 @@ public class AccountServiceImpl implements AccountService {
 
     private final AccountRepository accountRepository;
     private final TransactionRepository transactionRepository;
-    private final CustomerRepository customerRepository;
+    private final CustomerService customerService;
 
     @Override
     @Transactional
@@ -32,8 +34,7 @@ public class AccountServiceImpl implements AccountService {
             throw new RuntimeException("User can not be created with negative balance");
         }
 
-        Customer customer = customerRepository.findById(request.customerId())
-                .orElseThrow(() -> new RuntimeException("Customer not found"));
+        Customer customer = customerService.getCustomerInfo(request.customerId());
 
         Account account = new Account();
         account.setCustomer(customer);
