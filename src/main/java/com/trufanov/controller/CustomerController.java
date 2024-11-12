@@ -7,14 +7,15 @@ import com.trufanov.service.CustomerService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
-@RestController("/api/customer")
+@RestController
+@RequestMapping("/api/customer")
 @RequiredArgsConstructor
 public class CustomerController {
 
     private final CustomerService customerService;
 
     @PostMapping("/create")
-    public CreateEntityResponseDto createAccount(@RequestBody CreateCustomerRequestDto request) {
+    public CreateEntityResponseDto createCustomer(@RequestBody CreateCustomerRequestDto request) {
         return new CreateEntityResponseDto(customerService.createCustomer(request));
     }
 
