@@ -5,14 +5,19 @@ import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.math.BigDecimal;
 
 @Entity
 @Data
 @AllArgsConstructor
+@NoArgsConstructor
 public class Transaction {
     @Id
     private Long id;
-    private Double amount;
+
+    private BigDecimal amount;
 
     @ManyToOne
     private Account account;

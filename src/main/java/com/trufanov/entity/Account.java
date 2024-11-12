@@ -6,16 +6,17 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.List;
 
 @Entity
 @Data
 @AllArgsConstructor
+@NoArgsConstructor
 public class Account {
     @Id
     private Long id;
-    private Double balance;
 
     @ManyToOne
     private Customer customer;
