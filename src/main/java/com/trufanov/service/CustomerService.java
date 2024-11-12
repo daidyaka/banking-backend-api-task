@@ -9,5 +9,4 @@ public interface CustomerService {
     Long createCustomer(CreateCustomerRequestDto request);
     Customer getCustomerInfo(Long customerId);
     BigDecimal getCustomerTotalBalance(Long customerId);
-    void refreshCustomerBalance(Long customerId);
 }
