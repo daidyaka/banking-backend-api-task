@@ -113,7 +113,9 @@ The project includes **unit and integration tests** to verify business logic and
 
 - Customer, account, and transaction creation
 - Cache behavior and balance consistency
-- Coverage is XX %
+
+Test coverage is next:
+![test-coverage](test-coverage.png)
 
 ## How to launch?
 
