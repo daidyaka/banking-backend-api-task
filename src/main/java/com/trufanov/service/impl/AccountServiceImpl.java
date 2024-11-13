@@ -5,12 +5,10 @@ import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.trufanov.dto.request.CreateAccountRequestDto;
 import com.trufanov.entity.Account;
-import com.trufanov.entity.Customer;
 import com.trufanov.entity.Transaction;
 import com.trufanov.exception.EntityNotFoundException;
 import com.trufanov.repository.AccountRepository;
 import com.trufanov.service.AccountService;
-import com.trufanov.service.CustomerService;
 import com.trufanov.service.TransactionService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -18,6 +16,7 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.util.Collections;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
 @Service
@@ -27,7 +26,6 @@ public class AccountServiceImpl implements AccountService {
     private final AccountRepository accountRepository;
 
     private final TransactionService transactionService;
-    private final CustomerService customerService;
 
     //cache to prevent possible DoS attacks
     private final LoadingCache<Long, BigDecimal> accountBalanceCache = CacheBuilder.newBuilder()
@@ -48,20 +46,20 @@ public class AccountServiceImpl implements AccountService {
     @Override
     @Transactional
     public Long createAccount(CreateAccountRequestDto request) {
-        int initialBalanceComparison = request.initialCredit().compareTo(BigDecimal.ZERO);
+        BigDecimal depositAmount = request.initialCredit();
+        int initialBalanceComparison = depositAmount.compareTo(BigDecimal.ZERO);
         if (initialBalanceComparison < 0) {
             throw new RuntimeException("User can not be created with negative balance");
         }
 
-        Customer customer = customerService.getCustomerInfo(request.customerId());
-
         Account account = new Account();
-        account.setCustomerId(customer.getId());
+        account.setCustomerId(request.customerId());
         account.setTransactions(Collections.emptyList());
         account = accountRepository.save(account);
 
         if (initialBalanceComparison > 0) {
-            transactionService.createAccountTransaction(account.getId(), request.initialCredit());
+            transactionService.createDepositTransaction(account.getId(), depositAmount);
+            accountBalanceCache.put(account.getId(), depositAmount);
         }
 
         return account.getId();
@@ -69,12 +67,13 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public BigDecimal getAccountBalance(Long accountId) {
-        return accountBalanceCache.getUnchecked(accountId);
-    }
-
-    @Override
-    public void refreshAccountBalance(Long accountId) {
-        accountBalanceCache.refresh(accountId);
+        try {
+            return accountBalanceCache.get(accountId);
+        } catch (ExecutionException e) {
+            BigDecimal balance = calculateAccountBalance(accountId);
+            accountBalanceCache.put(accountId, balance);
+            return balance;
+        }
     }
 
     private BigDecimal calculateAccountBalance(Long accountId) {

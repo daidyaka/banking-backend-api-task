@@ -13,5 +13,4 @@ public interface AccountService {
 
     BigDecimal getAccountBalance(Long accountId);
 
-    void refreshAccountBalance(Long accountId);
 }
