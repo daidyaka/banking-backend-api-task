@@ -4,6 +4,7 @@ A Spring Boot backend API for managing customers, accounts, and transactions, us
 support for other databases and caching.
 
 ## Helpful navigation around README.md
+
 - [What was done](#what-was-done)
 - [API usage](#api-usage)
 - [Error Handling](#error-handling)
@@ -98,14 +99,16 @@ Developed API supports:
 ## Database:
 
 The API uses **H2 in-memory database** for quick setup and testing, configurable to support external databases (e.g.,
-PostgreSQL or MySQL) through spring configuration file [application.properties](src%2Fmain%2Fresources%2Fapplication.properties).
+PostgreSQL or MySQL) through spring configuration
+file [application.properties](src%2Fmain%2Fresources%2Fapplication.properties).
 
 ## Caching:
 
 Guava Cache is used for efficient balance calculations:
 
 - **Account Balance Cache**: Caches individual account balances, refreshed every 10 minutes or on transaction updates.
-- __Possible improvement__: add caching on customer entries retrieval from DB, so no more unnecessary calls to DB would be made.
+- __Possible improvement__: add caching on customer entries retrieval from DB, so no more unnecessary calls to DB would
+  be made.
 
 ## Testing:
 
@@ -125,7 +128,14 @@ Test coverage is next (not all lines covered due to Lombok auto-generated method
    cd banking-backend-api
    mvn spring-boot:run
 
-or just start [BankingBackendApiApplication.java](src%2Fmain%2Fjava%2Fcom%2Ftrufanov%2FBankingBackendApiApplication.java) from your IDEA
+or just
+start [BankingBackendApiApplication.java](src%2Fmain%2Fjava%2Fcom%2Ftrufanov%2FBankingBackendApiApplication.java) from
+your IDEA
 
-2. **Access H2 Console**: Go to `http://localhost:8080/h2-console` and use `jdbc:h2:mem:banking-api` as the JDBC URL.
+2. **Access UI**: You can user Postman or curl to call REST requests, or you can open http://localhost:8080/index.html
+   after application start in your browser and user simple UI for creating Customer, Accounts within customer and
+   retrieve customers' information.
+3. **Access H2 Console**: Go to `http://localhost:8080/h2-console` and use `jdbc:h2:mem:banking-api` as the JDBC URL.
 
+P.S. to be more fair with you, I am not a front-end engineer, so the UI page [index.html](src%2Fmain%2Fresources%2Fstatic%2Findex.html) I have generated using ChatGPT, other code
+parts are completely my brainchild :)

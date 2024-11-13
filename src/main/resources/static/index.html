@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Banking App</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        h1, h2 {
+            color: #333;
+        }
+        input, button {
+            margin: 5px 0;
+            padding: 8px;
+            width: 100%;
+            max-width: 300px;
+        }
+        .section {
+            margin-bottom: 20px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+        }
+        .output {
+            margin-top: 10px;
+            padding: 10px;
+            background-color: #eef;
+            border: 1px solid #ccd;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+
+<h1>Banking App</h1>
+
+<div class="section">
+    <h2>Create Customer</h2>
+    <input type="text" id="customerName" placeholder="Customer Name">
+    <input type="text" id="customerSurname" placeholder="Customer Surname">
+    <button onclick="createCustomer()">Create Customer</button>
+    <div id="customerOutput" class="output"></div>
+</div>
+
+<div class="section">
+    <h2>Create Account</h2>
+    <input type="number" id="accountCustomerId" placeholder="Customer ID">
+    <input type="number" id="initialCredit" placeholder="Initial Credit">
+    <button onclick="createAccount()">Create Account</button>
+    <div id="accountOutput" class="output"></div>
+</div>
+
+<div class="section">
+    <h2>Get Customer Info</h2>
+    <input type="number" id="customerIdInfo" placeholder="Customer ID">
+    <button onclick="getCustomerInfo()">Get Info</button>
+    <div id="customerInfoOutput" class="output"></div>
+</div>
+
+<script>
+    const apiBaseUrl = "http://localhost:8080/api";
+
+    async function createCustomer() {
+        const name = document.getElementById("customerName").value;
+        const surname = document.getElementById("customerSurname").value;
+
+        const response = await fetch(`${apiBaseUrl}/customer/create`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ name, surname })
+        });
+        const result = await response.json();
+        document.getElementById("customerOutput").textContent = response.ok
+            ? `Customer Created with ID: ${result.id}`
+            : `Error: ${result.message || 'Failed to create customer'}`;
+    }
+
+    async function createAccount() {
+        const customerId = document.getElementById("accountCustomerId").value;
+        const initialCredit = document.getElementById("initialCredit").value;
+
+        const response = await fetch(`${apiBaseUrl}/account/create`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ customerId, initialCredit: parseFloat(initialCredit) })
+        });
+        const result = await response.json();
+        document.getElementById("accountOutput").textContent = response.ok
+            ? `Account Created with ID: ${result.id}`
+            : `Error: ${result.message || 'Failed to create account'}`;
+    }
+
+    async function getCustomerInfo() {
+        const customerId = document.getElementById("customerIdInfo").value;
+
+        const response = await fetch(`${apiBaseUrl}/customer/${customerId}/info`, {
+            method: "GET",
+            headers: { "Content-Type": "application/json" }
+        });
+        const result = await response.json();
+
+        if (response.ok) {
+            const info = `
+                <p>ID: ${result.id}</p>
+                <p>Name: ${result.name}</p>
+                <p>Surname: ${result.surname}</p>
+                <p>Total Balance: ${result.balance}</p>
+                <p>Accounts:</p>
+                ${result.accounts.map(account => `
+                    <p>- Account ID: ${account.id}, Transactions as JSON: <input value='${JSON.stringify(account.transactions)}'></p>
+                `).join('')}
+            `;
+            document.getElementById("customerInfoOutput").innerHTML = info;
+        } else {
+            document.getElementById("customerInfoOutput").textContent = `Error: ${result.message || 'Failed to get customer info'}`;
+        }
+    }
+</script>
+
+</body>
+</html>
