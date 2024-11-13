@@ -114,7 +114,7 @@ The project includes **unit and integration tests** to verify business logic and
 - Customer, account, and transaction creation
 - Cache behavior and balance consistency
 
-Test coverage is next:
+Test coverage is next (not all lines covered due to Lombok auto-generated methods):
 ![test-coverage](test-coverage.png)
 
 ## How to launch?
