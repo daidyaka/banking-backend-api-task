@@ -3,6 +3,15 @@
 A Spring Boot backend API for managing customers, accounts, and transactions, using in-memory H2 for local testing, with
 support for other databases and caching.
 
+## Helpful navigation around README.md
+- [What was done](#what-was-done)
+- [API usage](#api-usage)
+- [Error Handling](#error-handling)
+- [Database](#database)
+- [Caching](#caching)
+- [Testing](#testing)
+- [How to launch](#how-to-launch)
+
 ## What was done:
 
 Developed API supports:
@@ -14,7 +23,7 @@ Developed API supports:
 - **Caching**: Optimized caching for customer account balances (to prevent possible DoS attacks and to prevent constant
   balance recalculations if amount of transactions is large).
 
-## API usage
+## API usage:
 
 - **Create Customer**
     - **POST** `/api/customer/create`
@@ -72,7 +81,7 @@ Developed API supports:
       }
       ```
 
-## Error Handling
+## Error Handling:
 
 - **General Exception**:
   ```json
@@ -86,19 +95,19 @@ Developed API supports:
     "message": "Entity not found"
   }
 
-## Database
+## Database:
 
 The API uses **H2 in-memory database** for quick setup and testing, configurable to support external databases (e.g.,
 PostgreSQL or MySQL) through spring configuration file [application.properties](src%2Fmain%2Fresources%2Fapplication.properties).
 
-## Caching
+## Caching:
 
 Guava Cache is used for efficient balance calculations:
 
 - **Account Balance Cache**: Caches individual account balances, refreshed every 10 minutes or on transaction updates.
 - __Possible improvement__: add caching on customer entries retrieval from DB, so no more unnecessary calls to DB would be made.
 
-## Testing
+## Testing:
 
 The project includes **unit and integration tests** to verify business logic and data consistency, covering:
 
