@@ -7,15 +7,19 @@ import com.trufanov.dto.request.CreateAccountRequestDto;
 import com.trufanov.entity.Account;
 import com.trufanov.entity.Transaction;
 import com.trufanov.exception.EntityNotFoundException;
+import com.trufanov.message.dto.TransactionEvent;
 import com.trufanov.repository.AccountRepository;
 import com.trufanov.service.AccountService;
-import com.trufanov.service.TransactionService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
@@ -25,7 +29,7 @@ public class AccountServiceImpl implements AccountService {
 
     private final AccountRepository accountRepository;
 
-    private final TransactionService transactionService;
+    private final ApplicationEventPublisher eventPublisher;
 
     //cache to prevent possible DoS attacks
     private final LoadingCache<Long, BigDecimal> accountBalanceCache = CacheBuilder.newBuilder()
@@ -54,12 +58,17 @@ public class AccountServiceImpl implements AccountService {
 
         Account account = new Account();
         account.setCustomerId(request.customerId());
-        account.setTransactions(Collections.emptyList());
+        account.setIncomingTransactions(Collections.emptyList());
+        account.setOutgoingTransactions(Collections.emptyList());
         account = accountRepository.save(account);
 
         if (initialBalanceComparison > 0) {
-            transactionService.createDepositTransaction(account.getId(), depositAmount);
-            accountBalanceCache.put(account.getId(), depositAmount);
+            Transaction tr = new Transaction();
+            tr.setToAccountId(account.getId());
+            tr.setFromAccountId(account.getId());
+            tr.setAmount(depositAmount);
+
+            eventPublisher.publishEvent(new TransactionEvent(this, tr));
         }
 
         return account.getId();
@@ -76,11 +85,27 @@ public class AccountServiceImpl implements AccountService {
         }
     }
 
+    @Override
+    public void refreshBalanceCache(Long accountId) {
+        accountBalanceCache.refresh(accountId);
+    }
+
     private BigDecimal calculateAccountBalance(Long accountId) {
-        return getAccountInfo(accountId)
-                .getTransactions()
+        Account account = getAccountInfo(accountId);
+        List<Transaction> transactions = new ArrayList<>();
+        transactions.addAll(account.getOutgoingTransactions());
+        transactions.addAll(account.getIncomingTransactions());
+        transactions.sort(Comparator.comparing(Transaction::getId));
+
+        return transactions
                 .stream()
-                .map(Transaction::getAmount)
+                .map(transaction -> {
+                    if (transaction.getFromAccountId().equals(accountId)) {
+                        return transaction.getAmount().negate();
+                    } else {
+                        return transaction.getAmount();
+                    }
+                })
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 }

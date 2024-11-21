@@ -1,12 +1,10 @@
 package com.trufanov.service;
 
+import com.trufanov.entity.Transaction;
 import jakarta.transaction.Transactional;
-
-import java.math.BigDecimal;
 
 public interface TransactionService {
 
     @Transactional
-    Long createDepositTransaction(Long accountId, BigDecimal amount);
-
+    void makeTransaction(Transaction transaction);
 }

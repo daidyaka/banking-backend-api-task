@@ -53,6 +53,8 @@ public class AccountIntegrationTest extends AbstractApiTest {
         createAccount(customerId, BigDecimal.valueOf(200));
         createAccount(customerId, BigDecimal.valueOf(300));
 
+        Thread.sleep(5000);
+
         BigDecimal expectedTotalBalance = BigDecimal.ZERO.add(BigDecimal.valueOf(200)).add(BigDecimal.valueOf(300));
         assertEquals(expectedTotalBalance, getRequest("/api/customer/" + customerId + "/info", Map.of(), Customer.class).getBalance());
     }
@@ -68,8 +70,9 @@ public class AccountIntegrationTest extends AbstractApiTest {
 
         Account account = accountService.getAccountInfo(accountId);
         List<Transaction> transactions = transactionRepository.findAll().stream()
-                .filter(transaction -> Objects.equals(transaction.getAccountId(), accountId))
+                .filter(transaction -> Objects.equals(transaction.getToAccountId(), accountId))
                 .toList();
+        Thread.sleep(5000);
 
         assertNotNull(account);
         assertEquals(customerId, account.getCustomerId());

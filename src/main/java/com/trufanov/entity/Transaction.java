@@ -16,12 +16,18 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 @NoArgsConstructor
 public class Transaction {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(name = "fromAccountId", nullable = false)
+    private Long fromAccountId;
+
+    @Column(name = "toAccountId", nullable = false)
+    private Long toAccountId;
+
+    @Column(name = "amount", nullable = false)
     private BigDecimal amount;
 
-    @Column(name = "accountId", nullable = false)
-    private Long accountId;
 }

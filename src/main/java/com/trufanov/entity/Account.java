@@ -24,6 +24,9 @@ public class Account {
     @Column(name = "customer_id", nullable = false)
     private Long customerId;
 
-    @OneToMany(mappedBy = "accountId")
-    private List<Transaction> transactions;
+    @OneToMany(mappedBy = "fromAccountId")
+    private List<Transaction> outgoingTransactions;
+
+    @OneToMany(mappedBy = "toAccountId")
+    private List<Transaction> incomingTransactions;
 }
